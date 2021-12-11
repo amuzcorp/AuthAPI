@@ -1,7 +1,14 @@
 <?php
 namespace Amuz\XePlugin\AuthAPI;
 
+use Amuz\XePlugin\AuthAPI\Commands\ActivateApiKey;
+use Amuz\XePlugin\AuthAPI\Commands\DeactivateApiKey;
+use Amuz\XePlugin\AuthAPI\Commands\DeleteApiKey;
+use Amuz\XePlugin\AuthAPI\Commands\GenerateApiKey;
+use Amuz\XePlugin\AuthAPI\Commands\ListApiKeys;
+use Amuz\XePlugin\AuthAPI\Middleware\AuthorizeApiKey;
 use Route;
+use Schema;
 use Xpressengine\Plugin\AbstractPlugin;
 
 class Plugin extends AbstractPlugin
@@ -14,7 +21,7 @@ class Plugin extends AbstractPlugin
     public function boot()
     {
         // implement code
-
+        app('router')->aliasMiddleware('auth.apikey', AuthorizeApiKey::class);
         $this->route();
     }
 
@@ -31,6 +38,16 @@ class Plugin extends AbstractPlugin
             }
         );
 
+    }
+
+    /**
+     * 추가된 커맨드라인 구문. artisan 내에서 handle을 실행할 수 있는 클래스를 등록 해 준다.
+     * command abstract class를 상속해야하고
+     * 사이트키 구분이 필요한경우 내부에서 로직을 따로 구현해야한다.
+     * 반드시 Illuminate\Console\Command를 상속받은 클래스를 리턴해야 하며, 여러개가 필요한경우 배열로 리턴할 수 있다.
+     */
+    public function commandClass($site_key = 'default'){
+        return [ActivateApiKey::class, DeactivateApiKey::class, DeleteApiKey::class, GenerateApiKey::class, ListApiKeys::class];
     }
 
     /**
@@ -52,7 +69,10 @@ class Plugin extends AbstractPlugin
      */
     public function install()
     {
-        // implement code
+        $migration = new ApiMigration();
+        if(Schema::hasTable('api_keys') === false){
+            $migration->up();
+        }
     }
 
     /**
@@ -63,7 +83,7 @@ class Plugin extends AbstractPlugin
      */
     public function checkInstalled()
     {
-        // implement code
+        if(Schema::hasTable('api_keys') === false) return false;
 
         return parent::checkInstalled();
     }
@@ -75,7 +95,10 @@ class Plugin extends AbstractPlugin
      */
     public function update()
     {
-        // implement code
+        $migration = new ApiMigration();
+        if(Schema::hasTable('api_keys') === false){
+            $migration->up();
+        }
     }
 
     /**
@@ -86,7 +109,7 @@ class Plugin extends AbstractPlugin
      */
     public function checkUpdated()
     {
-        // implement code
+        if(Schema::hasTable('api_keys') === false) return false;
 
         return parent::checkUpdated();
     }
