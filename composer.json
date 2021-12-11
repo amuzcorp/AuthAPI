@@ -1,0 +1,36 @@
+{
+  "name": "xpressengine-plugin/AuthAPI",
+  "description": "This Package is Xpressengine Plugin - Auth via REST API.",
+  "keywords": [
+    "xpressengine",
+    "plugin"
+  ],
+  "license": "LGPL-3.0-or-later",
+  "version": "1.0.0",
+  "type": "xpressengine-plugin",
+  "support": {
+    "email": "input@your.email"
+  },
+  "authors": [
+    {
+      "name": "input your name",
+      "email": "input@your.email",
+      "homepage": "http://input.your.site",
+      "role": "Developer"
+    }
+  ],
+  "extra": {
+    "xpressengine": {
+      "title": "Auth via REST API",
+      "component": {}
+    }
+  },
+  "require": {
+    "xpressengine/xpressengine": "~3.0.14"
+  },
+  "autoload": {
+    "psr-4": {
+      "Amuz\\XePlugin\\AuthAPI\\": "src/"
+    }
+  }
+}
