@@ -10,9 +10,22 @@ use Amuz\XePlugin\AuthAPI\Middleware\AuthorizeApiKey;
 use Route;
 use Schema;
 use Xpressengine\Plugin\AbstractPlugin;
+use XeInterception;
 
 class Plugin extends AbstractPlugin
 {
+    public function register(){
+        $app = app();
+
+        // DynamicFactoryService
+        $app->singleton(AuthApiService::class, function () {
+            $proxyHandler = XeInterception::proxy(AuthApiService::class);
+
+            return new $proxyHandler();
+        });
+        $app->alias(AuthApiService::class, 'amuz.authapi');
+    }
+
     /**
      * 이 메소드는 활성화(activate) 된 플러그인이 부트될 때 항상 실행됩니다.
      *

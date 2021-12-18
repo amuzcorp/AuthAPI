@@ -77,10 +77,19 @@ class ApiKey extends Model
     public static function generate()
     {
         do {
-            $key = Str::random(64);
+            $key = Str::random(32);
         } while (self::keyExists($key));
 
         return $key;
+    }
+    /**
+     * Generate a secure unique API key
+     *
+     * @return string
+     */
+    public static function genSecret()
+    {
+        return Str::random(200);
     }
 
     /**

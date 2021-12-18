@@ -27,13 +27,14 @@ class ListApiKeys extends Command
      */
     public function handle()
     {
+        $authApiService = app('amuz.authapi');
         $this->site_key = $this->argument('site_key');
-        $keys = $this->option('deleted')
-            ? ApiKey::withTrashed()->where('site_key',$this->site_key)->orderBy('name')->get()
-            : ApiKey::where('site_key',$this->site_key)->orderBy('name')->get();
+
+        $keys = $authApiService->listApiKeys(null,$this->site_key,false);
 
         if ($keys->count() === 0) {
             $this->info('There are no API keys');
+            $this->info('with' . $this->argument('deleted'));
             return;
         }
 
