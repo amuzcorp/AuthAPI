@@ -13,7 +13,34 @@ class AuthApiService
     const MESSAGE_ERROR_INVALID_NAME_FORMAT = '앱id는 소문자 알파벳과 하이픈, 숫자로만 구성해야 하고, 255자를 넘길 수 없습니다.';
     const MESSAGE_ERROR_NAME_ALREADY_USED   = '이미 등록된 앱 이름입니다.';
 
+    private $services = [];
+
     public function __construct(){
+        $this->setServices();
+    }
+
+    public function getServices(){
+        return $this->services;
+    }
+
+    public function setServices(){
+        $registeredServices = \XeRegister::get('authapi/services') ?: [];
+        if(count($registeredServices) < 1) return null;
+
+        $children = [];
+        //그룹이 나중에 선언될 가능성이 있어서 children을 따로 저장했다가 나중에 붙임
+        foreach($registeredServices as $key => $service){
+            $service['id'] = $key;
+            $group_id = explode(".",$key);
+            $service['is_use'] = "Y";
+            if(count($group_id) > 1){
+                if(!isset($childs[$group_id[0]])) $childs[$group_id[0]] = [];
+                $children[$group_id[0]][$group_id[1]] = $service;
+            }else{
+                $this->services[$group_id[0]] = $service;
+            }
+        }
+        foreach($children as $group_id => $services) $this->services[$group_id]["children"] = $services;
     }
 
     public function listApiKeys($userId = null, $siteKey = false, $withTrashed = false){
@@ -22,7 +49,7 @@ class AuthApiService
 
         if($withTrashed) $apiKeys->withTrashed();
 
-        if (!is_null($userId) && Auth::check()) $apiKeys->where('user_id', Auth::id());
+        if (!is_null($userId) || Auth::check()) $apiKeys->where('user_id', Auth::id());
 
         return $apiKeys->orderBy('name')->get();
     }

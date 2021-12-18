@@ -27,6 +27,7 @@ class ApiMigration
             $table->longText('secret');
             $table->boolean('active')->default(1);
 
+            $table->longText('allow_services');
             $table->longText('allow_ip');
 
             $table->timestamps();
