@@ -39,6 +39,22 @@ class ApiKey extends Model
         return $this->hasMany(ApiKeyAdminEvent::class, 'api_key_id');
     }
 
+    public function getAllowIps(){
+        return json_dec($this->allow_ip);
+    }
+
+    public function getAllowServices(){
+        return json_dec($this->allow_services);
+    }
+
+    public function hasGroup($group_id){
+        return in_array($group_id,$this->getAllowServices());
+    }
+
+    public function hasService($group_id, $service_id){
+        return (in_array($group_id,$this->getAllowServices()) || in_array($service_id,$this->getAllowServices()));
+    }
+
     /**
      * Bootstrapping event handlers
      */
