@@ -114,10 +114,12 @@ class ApiKey extends Model
      * @param string $key
      * @return bool
      */
-    public static function getByKey($key)
+    public static function getByKey($key,$siteKey = null)
     {
+        if($siteKey == null) $siteKey = \XeSite::getCurrentSiteKey();
         return self::where([
             'key'    => $key,
+            'site_key' => $siteKey,
             'active' => 1
         ])->first();
     }

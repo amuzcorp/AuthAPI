@@ -7,10 +7,13 @@ use Amuz\XePlugin\AuthAPI\Commands\DeleteApiKey;
 use Amuz\XePlugin\AuthAPI\Commands\GenerateApiKey;
 use Amuz\XePlugin\AuthAPI\Commands\ListApiKeys;
 use Amuz\XePlugin\AuthAPI\Middleware\AuthorizeApiKey;
+use Amuz\XePlugin\AuthAPI\Models\ApiKey;
 use Route;
 use Schema;
+use View;
 use Xpressengine\Plugin\AbstractPlugin;
 use XeInterception;
+use Xpressengine\User\UserHandler;
 
 class Plugin extends AbstractPlugin
 {
@@ -36,6 +39,38 @@ class Plugin extends AbstractPlugin
         // implement code
         app('router')->aliasMiddleware('auth.apikey', AuthorizeApiKey::class);
         $this->route();
+        $this->addUserSettingsMenu();
+    }
+
+    protected function addUserSettingsMenu(){
+        UserHandler::setSettingsSections('authApi', [
+            'title' => 'REST API App관리',
+            'content' => function ($user) {
+                app('xe.frontend')->css(self::asset('assets/style.css'))->load();
+
+                $authApiService = app('amuz.authapi');
+                $apiKeys = $authApiService->listApiKeys();
+
+                return view::make("AuthAPI::views.index",compact('user','apiKeys'));
+            }
+        ]);
+        UserHandler::setSettingsSections('apiAppCreate', [
+            'title' => '새 API APP 생성',
+            'content' => function ($user) {
+                app('xe.frontend')->css(self::asset('assets/style.css'))->load();
+
+                $appId = request()->get('appId');
+                $authApiService = app('amuz.authapi');
+                $apiKeys = $authApiService->listApiKeys();
+                $apiServices = $authApiService->getServices();
+
+                $selectedApp = $apiKeys->filter(function($item) use ($appId){
+                    return $item->id == $appId;
+                })->first();
+                if($selectedApp == null) $selectedApp = new ApiKey();
+                return view::make("AuthAPI::views.create",compact('user','apiKeys','apiServices','selectedApp'));
+            }
+        ]);
     }
 
     protected function route()
@@ -45,8 +80,11 @@ class Plugin extends AbstractPlugin
         Route::fixed(
             $this->getId(),
             function () {
-                Route::get('/', [
-                    'as' => 'AuthAPI::index','uses' => 'Amuz\XePlugin\AuthAPI\Controller@index'
+                Route::post('/create/{appId?}', [
+                    'as' => 'AuthAPI::createKey','uses' => 'Amuz\XePlugin\AuthAPI\Controller@createKey'
+                ]);
+                Route::post('/delete/{appId?}', [
+                    'as' => 'AuthAPI::deleteKey','uses' => 'Amuz\XePlugin\AuthAPI\Controller@deleteKey'
                 ]);
             }
         );
