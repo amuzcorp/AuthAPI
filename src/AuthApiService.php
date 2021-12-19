@@ -33,12 +33,12 @@ class AuthApiService
             $group_id = explode(".",$key);
             $service['is_use'] = "Y";
             if(count($group_id) > 1){
-                $service['id'] = $group_id[1];
+                $service['id'] = $group_id[0] . "_" . $group_id[1];
                 if(!isset($childs[$group_id[0]])) $childs[$group_id[0]] = [];
-                $children[$group_id[0]][$group_id[1]] = $service;
+                $children[$group_id[0]][$service['id']] = $service;
             }else{
                 $service['id'] = $group_id[0];
-                $this->services[$group_id[0]] = $service;
+                $this->services[$service['id']] = $service;
             }
         }
         foreach($children as $group_id => $services) $this->services[$group_id]["children"] = $services;
@@ -52,7 +52,7 @@ class AuthApiService
 
         if (!is_null($userId) || Auth::check()) $apiKeys->where('user_id', Auth::id());
 
-        return $apiKeys->orderBy('name')->get();
+        return $apiKeys->orderBy('id','desc')->get();
     }
 
     public function generate($appName, $siteKey = false){

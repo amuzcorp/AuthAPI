@@ -40,11 +40,11 @@ class ApiKey extends Model
     }
 
     public function getAllowIps(){
-        return json_dec($this->allow_ip);
+        return json_dec($this->allow_ip ?: '[""]');
     }
 
     public function getAllowServices(){
-        return json_dec($this->allow_services);
+        return json_dec($this->allow_services ?: "[]");
     }
 
     public function hasGroup($group_id){
@@ -70,11 +70,11 @@ class ApiKey extends Model
 
             $changed = $apiKey->getDirty();
 
-            if (isset($changed) && $changed['active'] === 1) {
+            if (isset($changed) && array_get('active',$changed,0) === 1) {
                 self::logApiKeyAdminEvent($apiKey, self::EVENT_NAME_ACTIVATED);
             }
 
-            if (isset($changed) && $changed['active'] === 0) {
+            if (isset($changed) && array_get('active',$changed,1) === 0) {
                 self::logApiKeyAdminEvent($apiKey, self::EVENT_NAME_DEACTIVATED);
             }
 
