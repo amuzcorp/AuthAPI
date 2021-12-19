@@ -16,7 +16,7 @@
             @endif
             <div class="setting-detail" {!! $selectedApp->id ? "style='display:none;'" : "" !!}>
                 <div class="setting-detail-content">
-                    <p>앱 이름 변경</p>
+                    <p>앱 이름</p>
                     <em class="text-gray2">앱 이름은 영문,숫자 또는 하이픈(-)만을 사용하여 200자 이내로 입력해야 합니다.</em>
                     <input type="text" class="__xe_nameInput xe-form-control" name="app_name" value="{{ $selectedApp->name }}" />
                     <em class="__xe_message text-message"></em>
